@@ -1,10 +1,15 @@
 // Programmers: James Hicks
 // Purpose: 3D OTGW RPG Game
 
+//GLOBAL TODO
+//  1)Create glcall() to wrap every function call in to log error messages
+//  2)Leverage out shader functions into their own header and c files
+
 // Preprocessor
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // Declarations
 void
@@ -15,6 +20,8 @@ void
 key_callback
 (GLFWwindow* window, int key, int scancode, int action, int mods);
 
+const GLchar* load_Shader(const GLchar* filename);
+
 void
 mouse_button_callback
 (GLFWwindow* window, int button, int action, int mods);
@@ -24,7 +31,7 @@ cursor_position_callback
 (GLFWwindow* window, double xpos, double ypos);
 
 // Entry point
-int main()
+int main(int argc, char *argv[])
 {
     // Window Variables
     int WIDTH = 640;
@@ -56,7 +63,6 @@ int main()
     glfwSetErrorCallback(error_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
-
 
     // Load OpenGL Functions
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -93,16 +99,63 @@ int main()
     GLuint vertexArrayObject;
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
-    glEnableVertexAttribArray(0); // TODO(JAMES: Will this always need to be 0?
+    glEnableVertexAttribArray(0); // TODO(JAMES): Will this always need to be 0
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+    // Vertex Shader (Remember to free shaders)
+    // TODO(JAMES): Figure out how to pass relative path for shaders
+    // TODO(JAMES): Cleanup to fit conventions
+    GLuint vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
+    const GLchar* vertexShaderSource = load_Shader
+    ("C:/Users/james/OneDrive/Desktop/OverTheGardenWall/vs/otgw/otgw/vertexShader.vert");
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+    GLint vertexCompiled;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexCompiled);
+    if (vertexCompiled != GL_TRUE)
+    {
+        GLsizei log_length = 0;
+        GLchar message[1024];
+        glGetShaderInfoLog(vertexShader, 1024, &log_length, message);
+        printf("ERROR::VERTEX SHADER COMPILATION FAILED:: %s", message);
+        return -1;
+    }
+
+    // Fragment Shader
+    const GLchar* fragmentShaderSource = load_Shader
+    ("C:/Users/james/OneDrive/Desktop/OverTheGardenWall/vs/otgw/otgw/fragmentShader.frag");
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+    GLint fragmentCompiled;
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentCompiled);
+    if (fragmentCompiled != GL_TRUE)
+    {
+        GLsizei log_length = 0;
+        GLchar message[1024];
+        glGetShaderInfoLog(fragmentShader, 1024, &log_length, message);
+        printf("ERROR::FRAGMENT SHADER COMPILATION FAILED:: %s", message);
+        return -1;
+    }
+
+    // Create Shader Program
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
 
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
-        // Render Here
-        glClearColor(.4,.1,.7,1.0);
+        // Setup
         glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(program);
+        glBindVertexArray(vertexArrayObject);
+
+        // Draw Calls
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // Swap Buffers
         glfwSwapBuffers(window);
@@ -166,6 +219,42 @@ key_callback
         printf("SHIFT KEY PRESSED\n");
     }
 } 
+
+// TODO(JAMES): Get rid of garbage characters at the end of the shader
+const GLchar* load_Shader(const GLchar* filename)
+{
+    FILE* f;
+    fopen_s(&f, filename, "r");
+
+    if (f == NULL)
+    {
+        perror("ERROR::FAILED TO OPEN SHADER:: ");
+        return NULL;
+    }
+ 
+    fseek(f, 0, SEEK_END);
+    unsigned long length = (unsigned long)ftell(f);
+    rewind(f);
+    GLchar* shader = malloc(length, sizeof(GLchar));
+ 
+    if (shader == NULL) 
+    {
+        printf("FAILED TO ALLOCATE MEMORY FOR SHADER");
+        return NULL;
+    }
+
+    int actualLength = 0;
+
+    for (int i = 0; i < length; ++i)
+    {
+        GLchar c = getc(f);
+        shader[i] = getc(f);
+        //putc(shader[i], stdout); //TESTING CODE
+    }
+ 
+    fclose(f);
+    return shader;
+}
 
 void 
 mouse_button_callback

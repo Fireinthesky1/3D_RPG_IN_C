@@ -26,5 +26,11 @@
     <None Include="vertexShader.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="fragmentShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="test.txt" />
   </ItemGroup>
 </Project>

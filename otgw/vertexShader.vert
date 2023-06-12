@@ -1,12 +1,9 @@
 #version 460 core
 
-in  vec4 vPosition;
-in  vec4 vColor;
-out vec4 color;
+in vec4 vposition;
 
 void
 main()
 {
-    color = vColor;
-    gl_Position = vPosition;
+    gl_Position = vposition;
 }
