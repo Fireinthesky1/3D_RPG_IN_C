@@ -2,7 +2,6 @@
 // Purpose: 3D OTGW RPG Game
 
 //GLOBAL TODO
-//  1)Create glcall() to wrap every function call in to log error messages
 //  2)Leverage out shader functions into their own header and c files
 //  3)General Cleanup
 
@@ -26,6 +25,18 @@ key_callback
 
 const GLchar* load_Shader(const GLchar* filename);
 
+void GLAPIENTRY
+MessageCallback
+(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam
+);
+
 void
 mouse_button_callback
 (GLFWwindow* window, int button, int action, int mods);
@@ -33,6 +44,9 @@ mouse_button_callback
 static void
 cursor_position_callback
 (GLFWwindow* window, double xpos, double ypos);
+
+// GLOBALS
+int WIREFRAMEMODE = 0;
 
 // Entry point
 int main(int argc, char *argv[])
@@ -77,6 +91,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // Enable debug output
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
+
     // Print OpenGL version and Renderer
     const GLubyte* renderer = glGetString(GL_RENDERER);
     printf
@@ -84,9 +102,7 @@ int main(int argc, char *argv[])
         GLVersion.major, GLVersion.minor, renderer);
 
     // Vertex Shader (Remember to free shaders)
-    // TODO(JAMES): Figure out how to pass relative path for shaders
-    const GLchar* vertexShaderSource = load_Shader
-    ("C:/Users/james/OneDrive/Desktop/OverTheGardenWall/vs/otgw/otgw/vertexShader.vert");
+    const GLchar* vertexShaderSource = load_Shader("vertexShader.vert");
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -103,7 +119,7 @@ int main(int argc, char *argv[])
 
     // Fragment Shader
     const GLchar* fragmentShaderSource = load_Shader
-    ("C:/Users/james/OneDrive/Desktop/OverTheGardenWall/vs/otgw/otgw/fragmentShader.frag");
+    ("fragmentShader.frag");
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
@@ -143,29 +159,49 @@ int main(int argc, char *argv[])
     // Vertex Data Array
     const GLfloat vertices[] =
     {
-         -0.50f,  0.00f,  0.00f, // left
-          0.00f,  0.50f,  0.00f, // top
-          0.50f,  0.00f,  0.00f  // right
+         -0.50f,   0.50f,   0.00f, // top left
+         -0.50f,  -0.50f,   0.00f, // bottom left
+          0.50f,  -0.50f,   0.00f, // bottom right
+          0.50f,   0.50f,   0.00f  // top right
+    };
+
+    const GLuint indices[] =
+    {
+        0, 1, 2,    // First Triangle
+        0, 2, 3     // Second Triangle
     };
 
     // Vertex Buffer Object & Vertex Array Object
-    GLuint vertexBufferObject, vertexArrayObject;
+    /*
+    1) Create ID's for our VBO, VAO, EBO
+    2) Bind our VAO
+    3) Bind VBO and copy vertex data into Vertex Buffer
+    4) Bind EBO and copy index data into Element Buffer
+    5) Set Vertex Attribute Pointers
+    6) Enable Vertex Attribute Array
+    */
+    GLuint vertexBufferObject, vertexArrayObject, elementBufferObject;
     glGenVertexArrays(1, &vertexArrayObject);
-    glGenBuffers(1, &vertexBufferObject);
     glBindVertexArray(vertexArrayObject);
 
+    glGenBuffers(1, &vertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
     glBufferData(
         GL_ARRAY_BUFFER,
         sizeof(vertices),
         vertices,
         GL_STATIC_DRAW);
+    
+    glGenBuffers(1, &elementBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(indices),
+                 indices,
+                 GL_STATIC_DRAW);
 
     glVertexAttribPointer
     (0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
-    glEnableVertexAttribArray(0);   //TODO(JAMES): LEARN THIS
-
-
+    glEnableVertexAttribArray(0);
 
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
@@ -177,17 +213,17 @@ int main(int argc, char *argv[])
         glBindVertexArray(vertexArrayObject);
 
         // Draw Calls
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Poll for and process events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-
     // Cleanup
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
+    glDeleteBuffers(1, &elementBufferObject);
     glfwTerminate();
     printf("CLEANUP SUCCESS");
     return 0;
@@ -246,6 +282,20 @@ key_callback
     {
         printf("SHIFT KEY PRESSED\n");
     }
+    else if (key == GLFW_KEY_0 && action == GLFW_RELEASE)
+    {
+        printf("TOGGLE::WIRE FRAME MODE\n");
+        if (WIREFRAMEMODE) 
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            WIREFRAMEMODE = 0;
+        }
+        else
+        {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            WIREFRAMEMODE = 1;
+        }
+    }
 }
 
 // TODO(JAMES): BULLETPROOF: Stops loading characters after first '}'
@@ -300,4 +350,61 @@ mouse_button_callback
     {
         printf("RIGHT MOUSE BUTTON CLICKED\n");
     }
+}
+
+void GLAPIENTRY
+MessageCallback
+(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam
+)
+{
+    printf("---------------------opengl-callback-start------------\n");
+    printf("message: %s\n", message);
+    printf("type: ");
+    switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+        printf("ERROR");
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        printf("DEPRECATED_BEHAVIOR");
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        printf("UNDEFINED_BEHAVIOR");
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        printf("PORTABILITY");
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        printf("PERFORMANCE");
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        printf("OTHER");
+        break;
+    }
+    printf("\n");
+
+    printf("id: 0x%x\n",id);
+    printf("severity: ");
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_LOW:
+        printf("LOW");
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        printf("MEDIUM");
+        break;
+    case GL_DEBUG_SEVERITY_HIGH:
+        printf("HIGH");
+        break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        printf("NOTIFICATION");
+        break;
+    }
+    printf("\n");
+    printf("---------------------opengl-callback-end--------------\n\n");
 }
