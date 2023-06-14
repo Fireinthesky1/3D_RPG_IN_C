@@ -33,4 +33,9 @@
   <ItemGroup>
     <Text Include="test.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="u_util.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

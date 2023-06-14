@@ -50,7 +50,7 @@ cursor_position_callback
 int WIREFRAMEMODE = 0;
 
 // Entry point
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     // Initialize GLFW
     if (!glfwInit())
@@ -192,13 +192,13 @@ int main(int argc, char *argv[])
         sizeof(vertices),
         vertices,
         GL_STATIC_DRAW);
-    
+
     glGenBuffers(1, &elementBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(indices),
-                 indices,
-                 GL_STATIC_DRAW);
+        sizeof(indices),
+        indices,
+        GL_STATIC_DRAW);
 
     glVertexAttribPointer
     (0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(program);
         glBindVertexArray(vertexArrayObject);
-        
+
         // Uniform Stuff DELETE================================================
         x += 0.001f;
         GLint uniformLocation = glGetUniformLocation(program, "deltaPosition");
@@ -243,26 +243,26 @@ int main(int argc, char *argv[])
 
 // Function Definitions
 // TODO(JAMES): FILL OUT CURSOR POSITION CALLBACK
-static void 
+static void
 cursor_position_callback
 (GLFWwindow* window, double xpos, double ypos)
 {
 }
 
-void 
+void
 error_callback
 (int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void 
+void
 framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-void 
+void
 key_callback
 (GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -297,7 +297,7 @@ key_callback
     else if (key == GLFW_KEY_0 && action == GLFW_RELEASE)
     {
         printf("TOGGLE::WIRE FRAME MODE\n");
-        if (WIREFRAMEMODE) 
+        if (WIREFRAMEMODE)
         {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             WIREFRAMEMODE = 0;
@@ -321,13 +321,13 @@ const GLchar* load_Shader(const GLchar* filename)
         perror("ERROR::FAILED TO OPEN SHADER:: ");
         return NULL;
     }
- 
+
     fseek(f, 0, SEEK_END);
     unsigned long length = (unsigned long)ftell(f);
     rewind(f);
     GLchar* shader = malloc(length);
- 
-    if (shader == NULL) 
+
+    if (shader == NULL)
     {
         printf("FAILED TO ALLOCATE MEMORY FOR SHADER");
         return NULL;
@@ -345,12 +345,12 @@ const GLchar* load_Shader(const GLchar* filename)
         shader[i] = c;
         //putc(shader[i], stdout); //TESTING CODE
     }
- 
+
     fclose(f);
     return shader;
 }
 
-void 
+void
 mouse_button_callback
 (GLFWwindow* window, int button, int action, int mods)
 {
@@ -401,7 +401,7 @@ MessageCallback
     }
     printf("\n");
 
-    printf("id: 0x%x\n",id);
+    printf("id: 0x%x\n", id);
     printf("severity: ");
     switch (severity) {
     case GL_DEBUG_SEVERITY_LOW:
