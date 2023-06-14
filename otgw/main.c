@@ -2,14 +2,15 @@
 // Purpose: 3D OTGW RPG Game
 
 //GLOBAL TODO
-//  2)Leverage out shader functions into their own header and c files
-//  3)General Cleanup
+//  1)Leverage out shader functions into their own header and c files
+//  2)General Cleanup
 
 // Preprocessor
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>   // DELETE WHEN SWITCHING TO GLM
 
 // Declarations
 void
@@ -203,6 +204,10 @@ int main(int argc, char *argv[])
     (0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
 
+    // Uniform Stuff DELETE====================================================
+    GLfloat x = 0.00f;
+    // Uniform Stuff DELETE====================================================
+
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -211,6 +216,13 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(program);
         glBindVertexArray(vertexArrayObject);
+        
+        // Uniform Stuff DELETE================================================
+        x += 0.001f;
+        GLint uniformLocation = glGetUniformLocation(program, "deltaPosition");
+        if (uniformLocation == -1) { printf("ERROR::FAILED TO GET UNIFORM"); }
+        glUniform4f(uniformLocation, x, x, x, 0.00f);
+        // Uniform Stuff DELETE================================================
 
         // Draw Calls
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
