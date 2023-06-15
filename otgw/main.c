@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <math.h>   // DELETE WHEN SWITCHING TO GLM
 
+#include "u_util.h"
+
 // Declarations
 void
 error_callback
@@ -23,8 +25,6 @@ framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void
 key_callback
 (GLFWwindow* window, int key, int scancode, int action, int mods);
-
-const GLchar* load_Shader(const GLchar* filename);
 
 void GLAPIENTRY
 MessageCallback
@@ -58,52 +58,52 @@ int main(int argc, char* argv[])
         printf("ERROR::FAILED TO INITIALIZE GLFW\n");
         return -1;
     }
-
+ 
     // Window Variables
     int WIDTH = 640;
     int HEIGHT = 480;
-
+ 
     // Get a pointer to a GLFW window
     GLFWwindow* window;
-
+ 
     // Create a window and its associated context
     window = glfwCreateWindow(WIDTH, HEIGHT, "OTGW", NULL, NULL);
-
+ 
     if (window == NULL)
     {
         printf("ERROR::FAILED TO CREATE WINDOW");
         glfwTerminate();
         return -1;
     }
-
+ 
     // Make the window's context current
     glfwMakeContextCurrent(window);
-
+ 
     // Register Callback functions for GLFW
     glfwSetErrorCallback(error_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
+ 
     // Load OpenGL Functions
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         printf("ERROR::FAILED TO INITIALIZE OPENGL CONTEXT");
         return -1;
     }
-
+ 
     // Enable debug output
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
-
+ 
     // Print OpenGL version and Renderer
     const GLubyte* renderer = glGetString(GL_RENDERER);
     printf
     ("OpenGL %d.%d, RENDERER: %s\n",
         GLVersion.major, GLVersion.minor, renderer);
-
+ 
     // Vertex Shader (Remember to free shaders)
-    const GLchar* vertexShaderSource = load_Shader("vertexShader.vert");
+    const GLchar* vertexShaderSource = load_file("vertexShader.vert");
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -117,10 +117,9 @@ int main(int argc, char* argv[])
         printf("ERROR::VERTEX SHADER COMPILATION FAILED:: %s", message);
         return -1;
     }
-
+ 
     // Fragment Shader
-    const GLchar* fragmentShaderSource = load_Shader
-    ("fragmentShader.frag");
+    const GLchar* fragmentShaderSource = load_file("fragmentShader.frag");
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
@@ -134,7 +133,7 @@ int main(int argc, char* argv[])
         printf("ERROR::FRAGMENT SHADER COMPILATION FAILED:: %s", message);
         return -1;
     }
-
+ 
     // Create Shader Program
     GLuint program = glCreateProgram();
     glAttachShader(program, vertexShader);
@@ -150,13 +149,13 @@ int main(int argc, char* argv[])
         printf("ERROR::SHADER PROGRAM LINKING FAILED:: %s", message);
         return -1;
     }
-
+ 
     // Cleanup after Shaders
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     free(vertexShaderSource);
     free(fragmentShaderSource);
-
+ 
     // Vertex Data Array
     const GLfloat vertices[] =
     {
@@ -165,13 +164,13 @@ int main(int argc, char* argv[])
           0.50f,  -0.50f,   0.00f, // bottom right
           0.50f,   0.50f,   0.00f  // top right
     };
-
+ 
     const GLuint indices[] =
     {
         0, 1, 2,    // First Triangle
         0, 2, 3     // Second Triangle
     };
-
+ 
     // Vertex Buffer Object & Vertex Array Object
     /*
     1) Create ID's for our VBO, VAO, EBO
@@ -184,7 +183,7 @@ int main(int argc, char* argv[])
     GLuint vertexBufferObject, vertexArrayObject, elementBufferObject;
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
-
+ 
     glGenBuffers(1, &vertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
     glBufferData(
@@ -192,22 +191,22 @@ int main(int argc, char* argv[])
         sizeof(vertices),
         vertices,
         GL_STATIC_DRAW);
-
+ 
     glGenBuffers(1, &elementBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
         sizeof(indices),
         indices,
         GL_STATIC_DRAW);
-
+ 
     glVertexAttribPointer
     (0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
-
+ 
     // Uniform Stuff DELETE====================================================
     GLfloat x = 0.00f;
     // Uniform Stuff DELETE====================================================
-
+ 
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -216,22 +215,22 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(program);
         glBindVertexArray(vertexArrayObject);
-
+ 
         // Uniform Stuff DELETE================================================
         x += 0.001f;
         GLint uniformLocation = glGetUniformLocation(program, "deltaPosition");
         if (uniformLocation == -1) { printf("ERROR::FAILED TO GET UNIFORM"); }
         glUniform4f(uniformLocation, x, x, x, 0.00f);
         // Uniform Stuff DELETE================================================
-
+ 
         // Draw Calls
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+ 
         // Poll for and process events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
+ 
     // Cleanup
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
@@ -308,46 +307,6 @@ key_callback
             WIREFRAMEMODE = 1;
         }
     }
-}
-
-// TODO(JAMES): BULLETPROOF: Stops loading characters after first '}'
-const GLchar* load_Shader(const GLchar* filename)
-{
-    FILE* f;
-    fopen_s(&f, filename, "r");
-
-    if (f == NULL)
-    {
-        perror("ERROR::FAILED TO OPEN SHADER:: ");
-        return NULL;
-    }
-
-    fseek(f, 0, SEEK_END);
-    unsigned long length = (unsigned long)ftell(f);
-    rewind(f);
-    GLchar* shader = malloc(length);
-
-    if (shader == NULL)
-    {
-        printf("FAILED TO ALLOCATE MEMORY FOR SHADER");
-        return NULL;
-    }
-
-    for (GLuint i = 0; i < length; ++i)
-    {
-        shader[i] = '\0';
-    }
-
-    for (GLuint i = 0; i < length; ++i)
-    {
-        GLchar c = getc(f);
-        if (c == '}') { shader[i] = c; break; }
-        shader[i] = c;
-        //putc(shader[i], stdout); //TESTING CODE
-    }
-
-    fclose(f);
-    return shader;
 }
 
 void

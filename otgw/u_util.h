@@ -1,12 +1,8 @@
 #pragma once
 
 #include <stdio.h>
-#include <stdlib.h> // TODO(James): Check if this is neccessary
 
 // read entire file into buffer
-// TODO(James): Figure out how to make this work without the "}" dependency
-// TODO(James): Crash when attempting to free the memory allocated here after
-// use Look into allocated and freeing memory
 const char* load_file(const char* filename)
 {
     FILE* f;
@@ -21,27 +17,19 @@ const char* load_file(const char* filename)
     fseek(f, 0, SEEK_END);
     unsigned long length = (unsigned long)ftell(f);
     rewind(f);
-    char* shader = (char*)malloc(sizeof(length));
+    char* buffer = (char*)calloc(length+1, sizeof(char));
 
-    if (shader == NULL)
+    if (buffer == NULL)
     {
         printf("FAILED TO ALLOCATE MEMORY FOR FILE");
         return NULL;
     }
 
-    for (int i = 0; i < length; ++i)
-    {
-        shader[i] = '\0';
-    }
-
-    for (int i = 0; i < length; ++i)
-    {
-        char c = getc(f);
-        if (c == '}') { shader[i] = c; break; }
-        shader[i] = c;
-        //putc(shader[i], stdout); //TESTING CODE
-    }
+    fread(buffer, 1, length, f);
 
     fclose(f);
-    return shader;
+
+    buffer[length] = '\0';
+
+    return buffer;
 }
