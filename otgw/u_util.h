@@ -17,7 +17,7 @@ const char* load_file(const char* filename)
     fseek(f, 0, SEEK_END);
     unsigned long length = (unsigned long)ftell(f);
     rewind(f);
-    char* buffer = (char*)calloc(length+1, sizeof(char));
+    char* buffer = (char*)calloc(length + 1, sizeof(char));
 
     if (buffer == NULL)
     {

@@ -159,10 +159,11 @@ int main(int argc, char* argv[])
     // Vertex Data Array
     const GLfloat vertices[] =
     {
-         -0.50f,   0.50f,   0.00f, // top left
-         -0.50f,  -0.50f,   0.00f, // bottom left
-          0.50f,  -0.50f,   0.00f, // bottom right
-          0.50f,   0.50f,   0.00f  // top right
+          // Vertices           //Colors
+         -0.50f,  0.50f, 0.00f, 1.00f, 0.00f, 0.00f,    // top left::RED
+         -0.50f, -0.50f, 0.00f, 0.00f, 1.00f, 0.00f,    // bottom left::GREEN
+          0.50f, -0.50f, 0.00f, 0.00f, 0.00f, 1.00f,    // bottom right::BLUE
+          0.50f,  0.50f, 0.00f, 0.85f, 0.45f, 0.30f     // top right::FUN COLOR
     };
  
     const GLuint indices[] =
@@ -199,12 +200,17 @@ int main(int argc, char* argv[])
         indices,
         GL_STATIC_DRAW);
  
+    // Position Attribute
     glVertexAttribPointer
-    (0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+    (0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
+
+    // Color Attribute
+    glVertexAttribPointer
+    (1, 3,  GL_FLOAT, GL_FALSE, 6*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
  
     // Uniform Stuff DELETE====================================================
-    GLfloat x = 0.00f;
     // Uniform Stuff DELETE====================================================
  
     // Rendering Loop
@@ -217,10 +223,6 @@ int main(int argc, char* argv[])
         glBindVertexArray(vertexArrayObject);
  
         // Uniform Stuff DELETE================================================
-        x += 0.001f;
-        GLint uniformLocation = glGetUniformLocation(program, "deltaPosition");
-        if (uniformLocation == -1) { printf("ERROR::FAILED TO GET UNIFORM"); }
-        glUniform4f(uniformLocation, x, x, x, 0.00f);
         // Uniform Stuff DELETE================================================
  
         // Draw Calls
