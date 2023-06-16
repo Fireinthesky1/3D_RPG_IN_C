@@ -13,24 +13,7 @@
 #include <math.h>   // DELETE WHEN SWITCHING TO GLM
 
 #include "u_util.h"
-
-// Declarations
-
-//=============================================================================
-// TODO(JAMES): Fill out this struct and test functionality
-struct shader 
-{
-    // Function Pointers
-    const char* (*p_load_shader_source)(const char*);
-    void(*p_bind_shader_source);
-    int(*p_compile_shader);
-    int(*p_link_shader);
-
-    // Data members
-    unsigned int shader_ID;
-
-};
-//=============================================================================
+#include "r_shader.h"
 
 void
 error_callback
@@ -119,42 +102,29 @@ int main(int argc, char* argv[])
     ("OpenGL %d.%d, RENDERER: %s\n",
         GLVersion.major, GLVersion.minor, renderer);
  
-    // Vertex Shader (Remember to free shaders)
-    const GLchar* vertexShaderSource = load_file("vertexShader.vert");
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    GLint vertexCompiled;
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexCompiled);
-    if (vertexCompiled != GL_TRUE)
+    // INITIALIZE SHADER STRUCT RIGHT HERE=====================================
+    struct shader vertex_shader =
     {
-        GLsizei log_length = 0;
-        GLchar message[1024];
-        glGetShaderInfoLog(vertexShader, 1024, &log_length, message);
-        printf("ERROR::VERTEX SHADER COMPILATION FAILED:: %s", message);
-        return -1;
-    }
- 
-    // Fragment Shader
-    const GLchar* fragmentShaderSource = load_file("fragmentShader.frag");
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    GLint fragmentCompiled;
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentCompiled);
-    if (fragmentCompiled != GL_TRUE)
+        u_load_file("vertexShader.vert"),
+        GL_VERTEX_SHADER,
+        glCreateShader(GL_VERTEX_SHADER)
+    };
+    s_bind_shader_source(&vertex_shader);
+    s_compile_shader(&vertex_shader);
+
+    struct shader fragment_shader =
     {
-        GLsizei log_length = 0;
-        GLchar message[1024];
-        glGetShaderInfoLog(fragmentShader, 1024, &log_length, message);
-        printf("ERROR::FRAGMENT SHADER COMPILATION FAILED:: %s", message);
-        return -1;
-    }
+        u_load_file("fragmentShader.frag"),
+        GL_FRAGMENT_SHADER,
+        glCreateShader(GL_FRAGMENT_SHADER)
+    };
+    s_bind_shader_source(&fragment_shader);
+    s_compile_shader(&vertex_shader);
  
     // Create Shader Program
     GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
+    glAttachShader(program, vertex_shader.id);
+    glAttachShader(program, fragment_shader.id);
     glLinkProgram(program);
     GLuint programLinked;
     glGetProgramiv(program, GL_LINK_STATUS, &programLinked);
@@ -166,12 +136,6 @@ int main(int argc, char* argv[])
         printf("ERROR::SHADER PROGRAM LINKING FAILED:: %s", message);
         return -1;
     }
- 
-    // Cleanup after Shaders
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    free(vertexShaderSource);
-    free(fragmentShaderSource);
  
     // Vertex Data Array
     const GLfloat vertices[] =
@@ -228,6 +192,8 @@ int main(int argc, char* argv[])
     glEnableVertexAttribArray(1);
  
     // Uniform Stuff DELETE====================================================
+    GLfloat x = 0.00f;
+    GLint uniform_color_delta_location;
     // Uniform Stuff DELETE====================================================
  
     // Rendering Loop
@@ -240,6 +206,11 @@ int main(int argc, char* argv[])
         glBindVertexArray(vertexArrayObject);
  
         // Uniform Stuff DELETE================================================
+        x += 0.01f;
+        uniform_color_delta_location = 
+            glGetUniformLocation(program, "u_color");
+        glUniform3f(uniform_color_delta_location, x, x, x);
+        glUseProgram(program);
         // Uniform Stuff DELETE================================================
  
         // Draw Calls
@@ -254,6 +225,10 @@ int main(int argc, char* argv[])
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
+    glDeleteShader(vertex_shader.id);
+    glDeleteShader(fragment_shader.id);
+    free(vertex_shader.source_code);
+    free(fragment_shader.source_code);
     glfwTerminate();
     printf("CLEANUP SUCCESS");
     return 0;

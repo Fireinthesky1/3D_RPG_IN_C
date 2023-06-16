@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 // read entire file into buffer
-const char* load_file(const char* filename)
+const char* u_load_file(const char* filename)
 {
     FILE* f;
     fopen_s(&f, filename, "r");

@@ -21,6 +21,9 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="r_shader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertexShader.vert">
@@ -36,6 +39,9 @@
   <ItemGroup>
     <ClInclude Include="u_util.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="r_shader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
