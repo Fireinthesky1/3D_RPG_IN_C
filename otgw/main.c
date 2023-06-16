@@ -15,6 +15,23 @@
 #include "u_util.h"
 
 // Declarations
+
+//=============================================================================
+// TODO(JAMES): Fill out this struct and test functionality
+struct shader 
+{
+    // Function Pointers
+    const char* (*p_load_shader_source)(const char*);
+    void(*p_bind_shader_source);
+    int(*p_compile_shader);
+    int(*p_link_shader);
+
+    // Data members
+    unsigned int shader_ID;
+
+};
+//=============================================================================
+
 void
 error_callback
 (int error, const char* description);
