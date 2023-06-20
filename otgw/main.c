@@ -2,8 +2,10 @@
 // Purpose: 3D OTGW RPG Game
 
 //GLOBAL TODO
-//  1)Leverage out shader functions into their own header and c files
-//  2)General Cleanup
+//  1)General Cleanup
+//  2)Leverage texture loading out
+//  3)Leverage vertex buffer object out
+//  4)Create function to load png images (Get rid of stb_image.h)
 
 // Preprocessor
 #include <glad/glad.h>
@@ -11,6 +13,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>   // DELETE WHEN SWITCHING TO GLM
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include "u_util.h"
 #include "r_shader.h"
@@ -99,10 +103,9 @@ int main(int argc, char* argv[])
     // Print OpenGL version and Renderer
     const GLubyte* renderer = glGetString(GL_RENDERER);
     printf
-    ("OpenGL %d.%d, RENDERER: %s\n",
+    ("OpenGL %d.%d, RENDERER: %s\n\n",
         GLVersion.major, GLVersion.minor, renderer);
  
-    // INITIALIZE SHADER STRUCT RIGHT HERE=====================================
     struct shader vertex_shader =
     {
         u_load_file("vertexShader.vert"),
@@ -136,15 +139,51 @@ int main(int argc, char* argv[])
         printf("ERROR::SHADER PROGRAM LINKING FAILED:: %s", message);
         return -1;
     }
+
+    /* TEXTURES
+    1) Create a texture object and load texel data into it
+    2) Include texture coordinates in vertex data
+    3) Associate a texture sampler with each texture map used in shader
+    4) Retrieve the texel values through the texture sampler from shader
+    */
+
+    GLuint texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glTexParameteri
+    (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri
+    (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    int width, height, channels;
+    unsigned char* image_data =
+        stbi_load("wall.jpg", &width, &height, &channels, 0);
  
+    if (image_data)
+    {
+        glTexImage2D
+        (GL_TEXTURE_2D, 0, GL_RGB, width,
+         height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        printf("ERROR::FAILED TO LOAD TEXTURE");
+        return -1;
+    }
+
     // Vertex Data Array
     const GLfloat vertices[] =
     {
-          // Vertices           //Colors
-         -0.50f,  0.50f, 0.00f, 1.00f, 0.00f, 0.00f,    // top left::RED
-         -0.50f, -0.50f, 0.00f, 0.00f, 1.00f, 0.00f,    // bottom left::GREEN
-          0.50f, -0.50f, 0.00f, 0.00f, 0.00f, 1.00f,    // bottom right::BLUE
-          0.50f,  0.50f, 0.00f, 0.85f, 0.45f, 0.30f     // top right::FUN COLOR
+          // Vertices             //Color                //Texture Coordinates
+         -0.50f,  0.50f, 0.00f,   1.00f, 0.00f, 0.00f,   0.00f, 1.00f, //TL
+         -0.50f, -0.50f, 0.00f,   0.00f, 1.00f, 0.00f,   0.00f, 0.00f, //BL
+          0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
+          0.50f,  0.50f, 0.00f,   0.85f, 0.45f, 0.30f,   1.00f, 1.00f  //TR
     };
  
     const GLuint indices[] =
@@ -183,18 +222,18 @@ int main(int argc, char* argv[])
  
     // Position Attribute
     glVertexAttribPointer
-    (0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GL_FLOAT), (void*)0);
+    (0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Color Attribute
     glVertexAttribPointer
-    (1, 3,  GL_FLOAT, GL_FALSE, 6*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
+    (1, 3,  GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
  
-    // Uniform Stuff DELETE====================================================
-    GLfloat x = 0.00f;
-    GLint uniform_color_delta_location;
-    // Uniform Stuff DELETE====================================================
+    // Texture Attribute
+    glVertexAttribPointer
+    (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
+    glEnableVertexAttribArray(2);
  
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
@@ -202,17 +241,12 @@ int main(int argc, char* argv[])
         // Setup
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glUseProgram(program);
+
+        glBindTexture(GL_TEXTURE_2D, texture_id);
         glBindVertexArray(vertexArrayObject);
- 
-        // Uniform Stuff DELETE================================================
-        x += 0.01f;
-        uniform_color_delta_location = 
-            glGetUniformLocation(program, "u_color");
-        glUniform3f(uniform_color_delta_location, x, x, x);
+
         glUseProgram(program);
-        // Uniform Stuff DELETE================================================
- 
+
         // Draw Calls
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
  
@@ -227,6 +261,8 @@ int main(int argc, char* argv[])
     glDeleteBuffers(1, &elementBufferObject);
     glDeleteShader(vertex_shader.id);
     glDeleteShader(fragment_shader.id);
+    glDeleteTextures(1, &texture_id);//SEE IF THIS WORKS=======================
+    stbi_image_free(image_data);
     free(vertex_shader.source_code);
     free(fragment_shader.source_code);
     glfwTerminate();
