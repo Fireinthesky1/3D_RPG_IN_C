@@ -1,4 +1,4 @@
-# otgw
+# Garden Engine
 
 The Engine and Source for a quasi 2D zelda like RPG.
 
@@ -12,20 +12,27 @@ The Engine and Source for a quasi 2D zelda like RPG.
 -
 
 ## In Progress
+- Rendering Engine
 
 ## Known Bugs
-
--"Play_again" menu will continue to prompt the player regardless of valid input.
+ - Buffer object 1 will use VIDEO memory as the source for buffer object operations d 0x20071
+ - warning LNK4099: PDB '' was not found with 'glfw3.lib(init.obj)' or at ''; linking object as if no debug info
 
 ## To do
-
-###Render a cube
-###Texture Atlas
-###Migrate everything over to SDL
-###Abstract Texture Loading
-###Abstract Vertex Buffer
-###Cleanup
-###File Structure
+> Rendering Engine
+ - Render a cube
+ - Texture Atlas
+ - Migrate everything over to SDL
+ - Abstract Texture Loading
+ - Abstract Vertex Buffer
+ - Cleanup
+ - File Structure
+> World Editor
+ - 
+> Entity Component System
+ - 
+> Memory Manager
+ - 
 
 ## Contributing
 
