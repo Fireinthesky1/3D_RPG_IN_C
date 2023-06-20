@@ -6,13 +6,14 @@
 //  2)Leverage texture loading out
 //  3)Leverage vertex buffer object out
 //  4)Create function to load png images (Get rid of stb_image.h)
+//  5)Switch everything to SDL
 
 // Preprocessor
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>   // DELETE WHEN SWITCHING TO GLM
+#include <math.h>   // DELETE WHEN SWITCHING TO CGLM
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -62,50 +63,50 @@ int main(int argc, char* argv[])
         printf("ERROR::FAILED TO INITIALIZE GLFW\n");
         return -1;
     }
- 
+
     // Window Variables
     int WIDTH = 640;
     int HEIGHT = 480;
- 
+
     // Get a pointer to a GLFW window
     GLFWwindow* window;
- 
+
     // Create a window and its associated context
     window = glfwCreateWindow(WIDTH, HEIGHT, "OTGW", NULL, NULL);
- 
+
     if (window == NULL)
     {
         printf("ERROR::FAILED TO CREATE WINDOW");
         glfwTerminate();
         return -1;
     }
- 
+
     // Make the window's context current
     glfwMakeContextCurrent(window);
- 
+
     // Register Callback functions for GLFW
     glfwSetErrorCallback(error_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
- 
+
     // Load OpenGL Functions
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         printf("ERROR::FAILED TO INITIALIZE OPENGL CONTEXT");
         return -1;
     }
- 
+
     // Enable debug output
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
- 
+
     // Print OpenGL version and Renderer
     const GLubyte* renderer = glGetString(GL_RENDERER);
     printf
     ("OpenGL %d.%d, RENDERER: %s\n\n",
         GLVersion.major, GLVersion.minor, renderer);
- 
+
     struct shader vertex_shader =
     {
         u_load_file("vertexShader.vert"),
@@ -123,7 +124,7 @@ int main(int argc, char* argv[])
     };
     s_bind_shader_source(&fragment_shader);
     s_compile_shader(&vertex_shader);
- 
+
     // Create Shader Program
     GLuint program = glCreateProgram();
     glAttachShader(program, vertex_shader.id);
@@ -162,7 +163,7 @@ int main(int argc, char* argv[])
     int width, height, channels;
     unsigned char* image_data =
         stbi_load("wall.jpg", &width, &height, &channels, 0);
- 
+
     if (image_data)
     {
         glTexImage2D
@@ -185,13 +186,13 @@ int main(int argc, char* argv[])
           0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
           0.50f,  0.50f, 0.00f,   0.85f, 0.45f, 0.30f,   1.00f, 1.00f  //TR
     };
- 
+
     const GLuint indices[] =
     {
         0, 1, 2,    // First Triangle
         0, 2, 3     // Second Triangle
     };
- 
+
     // Vertex Buffer Object & Vertex Array Object
     /*
     1) Create ID's for our VBO, VAO, EBO
@@ -204,7 +205,7 @@ int main(int argc, char* argv[])
     GLuint vertexBufferObject, vertexArrayObject, elementBufferObject;
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
- 
+
     glGenBuffers(1, &vertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
     glBufferData(
@@ -212,14 +213,14 @@ int main(int argc, char* argv[])
         sizeof(vertices),
         vertices,
         GL_STATIC_DRAW);
- 
+
     glGenBuffers(1, &elementBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
         sizeof(indices),
         indices,
         GL_STATIC_DRAW);
- 
+
     // Position Attribute
     glVertexAttribPointer
     (0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)0);
@@ -229,12 +230,18 @@ int main(int argc, char* argv[])
     glVertexAttribPointer
     (1, 3,  GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
- 
+
     // Texture Attribute
     glVertexAttribPointer
     (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
     glEnableVertexAttribArray(2);
- 
+
+//UNIFORM DELETE===============================================================
+    GLfloat u_delta_sin, u_delta_cos;
+    GLint sin_location = glGetUniformLocation(program, "u_delta_sin");
+    GLint cos_location = glGetUniformLocation(program, "u_delta_cos");
+//UNIFORM DELETE===============================================================
+
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -242,19 +249,28 @@ int main(int argc, char* argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //Textures and VAO
         glBindTexture(GL_TEXTURE_2D, texture_id);
         glBindVertexArray(vertexArrayObject);
 
         glUseProgram(program);
 
+//UNIFORM DELETE===============================================================
+        u_delta_sin = sin(glfwGetTime());
+        u_delta_cos = cos(glfwGetTime());
+        glUniform1f(sin_location, u_delta_sin);
+        glUniform1f(cos_location, u_delta_cos);
+//UNIFORM DELETE===============================================================
+
+
         // Draw Calls
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
- 
+
         // Poll for and process events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
- 
+
     // Cleanup
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
