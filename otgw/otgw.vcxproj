@@ -138,6 +138,7 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="r_shader.c" />
+    <ClCompile Include="r_texture.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragmentShader.frag" />
@@ -147,6 +148,8 @@
     <Text Include="test.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HandmadeMath.h" />
+    <ClInclude Include="r_texture.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="u_util.h" />
     <ClInclude Include="r_shader.h" />

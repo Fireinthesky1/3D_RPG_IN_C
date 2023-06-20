@@ -11,4 +11,4 @@ struct shader
 };
 
 void s_bind_shader_source(struct shader* shader);
-void s_compile_shader(struct shader *shader);
+void s_compile_shader(struct shader* shader);

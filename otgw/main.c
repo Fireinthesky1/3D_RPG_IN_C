@@ -7,18 +7,20 @@
 //  3)Leverage vertex buffer object out
 //  4)Create function to load png images (Get rid of stb_image.h)
 //  5)Switch everything to SDL
+//  6)Add hot reload
 
 // Preprocessor
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>   // DELETE WHEN SWITCHING TO CGLM
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "HandmadeMath.h"
 #include "u_util.h"
 #include "r_shader.h"
+#include "r_texture.h"
 
 void
 error_callback
@@ -148,6 +150,9 @@ int main(int argc, char* argv[])
     4) Retrieve the texel values through the texture sampler from shader
     */
 
+//TODO(JAMES):INSERT TEXTURE ABSTRACTION CODE HERE
+
+
     GLuint texture_id;
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -236,12 +241,6 @@ int main(int argc, char* argv[])
     (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
     glEnableVertexAttribArray(2);
 
-//UNIFORM DELETE===============================================================
-    GLfloat u_delta_sin, u_delta_cos;
-    GLint sin_location = glGetUniformLocation(program, "u_delta_sin");
-    GLint cos_location = glGetUniformLocation(program, "u_delta_cos");
-//UNIFORM DELETE===============================================================
-
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
@@ -254,14 +253,6 @@ int main(int argc, char* argv[])
         glBindVertexArray(vertexArrayObject);
 
         glUseProgram(program);
-
-//UNIFORM DELETE===============================================================
-        u_delta_sin = sin(glfwGetTime());
-        u_delta_cos = cos(glfwGetTime());
-        glUniform1f(sin_location, u_delta_sin);
-        glUniform1f(cos_location, u_delta_cos);
-//UNIFORM DELETE===============================================================
-
 
         // Draw Calls
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -277,12 +268,12 @@ int main(int argc, char* argv[])
     glDeleteBuffers(1, &elementBufferObject);
     glDeleteShader(vertex_shader.id);
     glDeleteShader(fragment_shader.id);
-    glDeleteTextures(1, &texture_id);//SEE IF THIS WORKS=======================
+    glDeleteTextures(1, &texture_id);
     stbi_image_free(image_data);
     free(vertex_shader.source_code);
     free(fragment_shader.source_code);
     glfwTerminate();
-    printf("CLEANUP SUCCESS");
+    printf("CLEANUP SUCCESS\n");
     return 0;
 }
 
