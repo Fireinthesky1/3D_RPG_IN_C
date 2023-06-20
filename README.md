@@ -19,14 +19,13 @@ The Engine and Source for a quasi 2D zelda like RPG.
 
 ## To do
 
--Render a cube
--Texture Atlas
--Migrate everything over to SDL
--Abstraction List
-     -Texture Loading
-     -Vertex Buffer
--Cleanup
--File Structure
+###Render a cube
+###Texture Atlas
+###Migrate everything over to SDL
+###Abstract Texture Loading
+###Abstract Vertex Buffer
+###Cleanup
+###File Structure
 
 ## Contributing
 
