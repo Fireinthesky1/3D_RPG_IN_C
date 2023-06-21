@@ -150,37 +150,32 @@ int main(int argc, char* argv[])
     4) Retrieve the texel values through the texture sampler from shader
     */
 
-//TODO(JAMES):INSERT TEXTURE ABSTRACTION CODE HERE
-
-
-    GLuint texture_id;
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-
-    glTexParameteri
-    (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri
-    (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    int width, height, channels;
-    unsigned char* image_data =
-        stbi_load("wall.jpg", &width, &height, &channels, 0);
-
-    if (image_data)
+// GET RID OF MESSY INITIALIZATION=============================================
+    GLint t_width, t_height, t_channels;
+    GLuint id;
+    struct texture my_texture =
     {
-        glTexImage2D
-        (GL_TEXTURE_2D, 0, GL_RGB, width,
-         height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
+        stbi_load("wall.jpg", &t_width, &t_height, &t_channels,0),
+        t_width,
+        t_height,
+        GL_TEXTURE_2D,
+        &id
+    };
+    t_initialize_id(&my_texture);
+    t_bind_texture(&my_texture);
+    t_set_tex_param(&my_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    t_set_tex_param(&my_texture,
+                    GL_TEXTURE_MAG_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    if(t_specify_image(&my_texture) == -1)
     {
         printf("ERROR::FAILED TO LOAD TEXTURE");
-        return -1;
+        return - 1;
     }
+    t_gen_mip_map(&my_texture);
+// GET RID OF MESSY INITIALIZATION=============================================
 
     // Vertex Data Array
     const GLfloat vertices[] =
@@ -249,7 +244,7 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Textures and VAO
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+        t_bind_texture(&my_texture);
         glBindVertexArray(vertexArrayObject);
 
         glUseProgram(program);
@@ -268,8 +263,8 @@ int main(int argc, char* argv[])
     glDeleteBuffers(1, &elementBufferObject);
     glDeleteShader(vertex_shader.id);
     glDeleteShader(fragment_shader.id);
-    glDeleteTextures(1, &texture_id);
-    stbi_image_free(image_data);
+    glDeleteTextures(1, &(my_texture.id));
+    stbi_image_free(my_texture.image_data);
     free(vertex_shader.source_code);
     free(fragment_shader.source_code);
     glfwTerminate();
