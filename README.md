@@ -21,8 +21,9 @@ The Engine and Source for a quasi 2D zelda like RPG.
 ## To do
 > Rendering Engine
  - Render a cube
- - Texture Atlas
+ - add uniform functions to r_shader
  - Migrate everything over to SDL
+ - Texture Atlas
  - Abstract Texture Loading
  - Abstract Vertex Buffer
  - Cleanup
