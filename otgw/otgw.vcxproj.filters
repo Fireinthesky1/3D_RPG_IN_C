@@ -40,20 +40,17 @@
     <Text Include="test.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="u_util.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="r_shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HandmadeMath.h">
+    <ClInclude Include="u_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="r_texture.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

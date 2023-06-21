@@ -12,12 +12,12 @@
 // Preprocessor
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
 #include <stdio.h>
 #include <stdlib.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "HandmadeMath.h"
 #include "u_util.h"
 #include "r_shader.h"
 #include "r_texture.h"
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
     // Vertex Data Array
     //const GLfloat vertices[] =
     //{
-    //      // Vertices             //Color                //Texture Coordinates
+    //      //Vertices             //Color                //Texture Coordinates
     //     -0.50f,  0.50f, 0.00f,   1.00f, 0.00f, 0.00f,   0.00f, 1.00f, //TL
     //     -0.50f, -0.50f, 0.00f,   0.00f, 1.00f, 0.00f,   0.00f, 0.00f, //BL
     //      0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
@@ -265,9 +265,30 @@ int main(int argc, char* argv[])
         // Setup
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glUseProgram(program);
 
         //Textures and VAO
-//        t_bind_texture(&my_texture);
+        //t_bind_texture(&my_texture);
+//UNIFORM DELETE===============================================================
+        float time = glfwGetTime();
+        mat3 matrix_rotate_z =
+        {
+            cos(time),  sin(time), 0,
+           -sin(time),  cos(time), 0,
+            0,          0,         1
+        };
+        mat3 matrix_rotate_x =
+        {
+            1,  0,         0,
+            0,  cos(time), sin(time),
+            0, -sin(time), cos(time)
+        };
+
+        mat3 uniform_matrix;
+        glm_mat3_mul(matrix_rotate_x, matrix_rotate_z, uniform_matrix);
+        GLint location = glGetUniformLocation(program, "u_rotation_matrix");
+//UNIFORM DELETE===============================================================
+        glUniformMatrix3fv(location, 1, GL_FALSE, &uniform_matrix);
         glBindVertexArray(vertexArrayObject);
 
         glUseProgram(program);
