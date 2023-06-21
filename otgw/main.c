@@ -151,46 +151,69 @@ int main(int argc, char* argv[])
     */
 
 // GET RID OF MESSY INITIALIZATION=============================================
-    GLint t_width, t_height, t_channels;
-    GLuint id;
-    struct texture my_texture =
-    {
-        stbi_load("wall.jpg", &t_width, &t_height, &t_channels,0),
-        t_width,
-        t_height,
-        GL_TEXTURE_2D,
-        &id
-    };
-    t_initialize_id(&my_texture);
-    t_bind_texture(&my_texture);
-    t_set_tex_param(&my_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    t_set_tex_param(&my_texture,
-                    GL_TEXTURE_MAG_FILTER,
-                    GL_LINEAR_MIPMAP_LINEAR);
-    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    if(t_specify_image(&my_texture) == -1)
-    {
-        printf("ERROR::FAILED TO LOAD TEXTURE");
-        return - 1;
-    }
-    t_gen_mip_map(&my_texture);
+//    GLint t_width, t_height, t_channels;
+//    GLuint id;
+//    struct texture my_texture =
+//    {
+//        stbi_load("wall.jpg", &t_width, &t_height, &t_channels,0),
+//        t_width,
+//        t_height,
+//        GL_TEXTURE_2D,
+//        &id
+//    };
+//    t_initialize_id(&my_texture);
+//    t_bind_texture(&my_texture);
+//    t_set_tex_param(&my_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    t_set_tex_param(&my_texture,
+//                    GL_TEXTURE_MAG_FILTER,
+//                    GL_LINEAR_MIPMAP_LINEAR);
+//    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//    if(t_specify_image(&my_texture) == -1)
+//    {
+//        printf("ERROR::FAILED TO LOAD TEXTURE");
+//        return - 1;
+//    }
+//    t_gen_mip_map(&my_texture);
 // GET RID OF MESSY INITIALIZATION=============================================
 
     // Vertex Data Array
+    //const GLfloat vertices[] =
+    //{
+    //      // Vertices             //Color                //Texture Coordinates
+    //     -0.50f,  0.50f, 0.00f,   1.00f, 0.00f, 0.00f,   0.00f, 1.00f, //TL
+    //     -0.50f, -0.50f, 0.00f,   0.00f, 1.00f, 0.00f,   0.00f, 0.00f, //BL
+    //      0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
+    //      0.50f,  0.50f, 0.00f,   0.85f, 0.45f, 0.30f,   1.00f, 1.00f  //TR
+    //};
+
     const GLfloat vertices[] =
     {
-          // Vertices             //Color                //Texture Coordinates
-         -0.50f,  0.50f, 0.00f,   1.00f, 0.00f, 0.00f,   0.00f, 1.00f, //TL
-         -0.50f, -0.50f, 0.00f,   0.00f, 1.00f, 0.00f,   0.00f, 0.00f, //BL
-          0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
-          0.50f,  0.50f, 0.00f,   0.85f, 0.45f, 0.30f,   1.00f, 1.00f  //TR
+        //vertices
+        -0.50f,  0.50f, 0.00f, //FTL
+         0.50f,  0.50f, 0.00f, //FBL
+        -0.50f, -0.50f, 0.00f, //FBR
+         0.50f, -0.50f, 0.00f, //FTR
+        -0.50f,  0.50f, 1.00f, //BTL
+         0.50f,  0.50f, 1.00f, //BBL
+        -0.50f, -0.50f, 1.00f, //BBR
+         0.50f, -0.50f, 1.00f  //BTR
     };
+
+    //const GLuint indices[] =
+    //{
+    //    0, 1, 2,    // First Triangle
+    //    0, 2, 3     // Second Triangle
+    //};
 
     const GLuint indices[] =
     {
-        0, 1, 2,    // First Triangle
-        0, 2, 3     // Second Triangle
+        0,2,3,   0,1,3, //FRONT
+        4,6,7,   4,5,7, //BACK
+        0,2,6,   0,4,6, //LEFT
+        1,3,7,   1,5,7, //RIGHT
+        0,4,1,   1,4,5, //TOP
+        2,6,3,   3,6,7  //BOTTOM
     };
 
     // Vertex Buffer Object & Vertex Array Object
@@ -223,18 +246,18 @@ int main(int argc, char* argv[])
 
     // Position Attribute
     glVertexAttribPointer
-    (0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)0);
+    (0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Color Attribute
-    glVertexAttribPointer
-    (1, 3,  GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // Texture Attribute
-    glVertexAttribPointer
-    (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
-    glEnableVertexAttribArray(2);
+//    // Color Attribute
+//    glVertexAttribPointer
+//    (1, 3,  GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
+//    glEnableVertexAttribArray(1);
+//
+//    // Texture Attribute
+//    glVertexAttribPointer
+//    (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
+//    glEnableVertexAttribArray(2);
 
     // Rendering Loop
     while (!glfwWindowShouldClose(window))
@@ -244,13 +267,13 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //Textures and VAO
-        t_bind_texture(&my_texture);
+//        t_bind_texture(&my_texture);
         glBindVertexArray(vertexArrayObject);
 
         glUseProgram(program);
 
         // Draw Calls
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         // Poll for and process events
         glfwSwapBuffers(window);
@@ -263,8 +286,8 @@ int main(int argc, char* argv[])
     glDeleteBuffers(1, &elementBufferObject);
     glDeleteShader(vertex_shader.id);
     glDeleteShader(fragment_shader.id);
-    glDeleteTextures(1, &(my_texture.id));
-    stbi_image_free(my_texture.image_data);
+//    glDeleteTextures(1, &(my_texture.id));
+//    stbi_image_free(my_texture.image_data);
     free(vertex_shader.source_code);
     free(fragment_shader.source_code);
     glfwTerminate();
