@@ -4,14 +4,14 @@ The Engine and Source for a quasi 2D zelda like RPG.
 
 
 ## Usage
-
+- (coming soon)
 
 
 ## Interesting Features
-
--
+- (coming soon)
 
 ## In Progress
+- Setting Up Platform Layer for Windows and Linux
 - Rendering Engine
 
 ## Known Bugs
@@ -19,10 +19,11 @@ The Engine and Source for a quasi 2D zelda like RPG.
  - warning LNK4099: PDB '' was not found with 'glfw3.lib(init.obj)' or at ''; linking object as if no debug info
 
 ## To do
+> Setting up Dev Environment
+> Platform Layer
 > Rendering Engine
  - Render a cube
  - add uniform functions to r_shader
- - Migrate everything over to SDL
  - Texture Atlas
  - Abstract Texture Loading
  - Abstract Vertex Buffer
