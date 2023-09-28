@@ -150,42 +150,42 @@ int main(int argc, char* argv[])
     4) Retrieve the texel values through the texture sampler from shader
     */
 
-// GET RID OF MESSY INITIALIZATION=============================================
-//    GLint t_width, t_height, t_channels;
-//    GLuint id;
-//    struct texture my_texture =
-//    {
-//        stbi_load("wall.jpg", &t_width, &t_height, &t_channels,0),
-//        t_width,
-//        t_height,
-//        GL_TEXTURE_2D,
-//        &id
-//    };
-//    t_initialize_id(&my_texture);
-//    t_bind_texture(&my_texture);
-//    t_set_tex_param(&my_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    t_set_tex_param(&my_texture,
-//                    GL_TEXTURE_MAG_FILTER,
-//                    GL_LINEAR_MIPMAP_LINEAR);
-//    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//    if(t_specify_image(&my_texture) == -1)
-//    {
-//        printf("ERROR::FAILED TO LOAD TEXTURE");
-//        return - 1;
-//    }
-//    t_gen_mip_map(&my_texture);
-// GET RID OF MESSY INITIALIZATION=============================================
+    // GET RID OF MESSY INITIALIZATION=============================================
+    //    GLint t_width, t_height, t_channels;
+    //    GLuint id;
+    //    struct texture my_texture =
+    //    {
+    //        stbi_load("wall.jpg", &t_width, &t_height, &t_channels,0),
+    //        t_width,
+    //        t_height,
+    //        GL_TEXTURE_2D,
+    //        &id
+    //    };
+    //    t_initialize_id(&my_texture);
+    //    t_bind_texture(&my_texture);
+    //    t_set_tex_param(&my_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //    t_set_tex_param(&my_texture,
+    //                    GL_TEXTURE_MAG_FILTER,
+    //                    GL_LINEAR_MIPMAP_LINEAR);
+    //    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    //    t_set_tex_param(&my_texture, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //    if(t_specify_image(&my_texture) == -1)
+    //    {
+    //        printf("ERROR::FAILED TO LOAD TEXTURE");
+    //        return - 1;
+    //    }
+    //    t_gen_mip_map(&my_texture);
+    // GET RID OF MESSY INITIALIZATION=============================================
 
-    // Vertex Data Array
-    //const GLfloat vertices[] =
-    //{
-    //      //Vertices             //Color                //Texture Coordinates
-    //     -0.50f,  0.50f, 0.00f,   1.00f, 0.00f, 0.00f,   0.00f, 1.00f, //TL
-    //     -0.50f, -0.50f, 0.00f,   0.00f, 1.00f, 0.00f,   0.00f, 0.00f, //BL
-    //      0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
-    //      0.50f,  0.50f, 0.00f,   0.85f, 0.45f, 0.30f,   1.00f, 1.00f  //TR
-    //};
+        // Vertex Data Array
+        //const GLfloat vertices[] =
+        //{
+        //      //Vertices             //Color                //Texture Coordinates
+        //     -0.50f,  0.50f, 0.00f,   1.00f, 0.00f, 0.00f,   0.00f, 1.00f, //TL
+        //     -0.50f, -0.50f, 0.00f,   0.00f, 1.00f, 0.00f,   0.00f, 0.00f, //BL
+        //      0.50f, -0.50f, 0.00f,   0.00f, 0.00f, 1.00f,   1.00f, 0.00f, //BR
+        //      0.50f,  0.50f, 0.00f,   0.85f, 0.45f, 0.30f,   1.00f, 1.00f  //TR
+        //};
 
     const GLfloat vertices[] =
     {
@@ -249,17 +249,17 @@ int main(int argc, char* argv[])
     (0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
 
-//    // Color Attribute
-//    glVertexAttribPointer
-//    (1, 3,  GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
-//    glEnableVertexAttribArray(1);
-//
-//    // Texture Attribute
-//    glVertexAttribPointer
-//    (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
-//    glEnableVertexAttribArray(2);
+    //    // Color Attribute
+    //    glVertexAttribPointer
+    //    (1, 3,  GL_FLOAT, GL_FALSE, 8*sizeof(GL_FLOAT), (void*)(3*sizeof(float)));
+    //    glEnableVertexAttribArray(1);
+    //
+    //    // Texture Attribute
+    //    glVertexAttribPointer
+    //    (2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void*)(6*sizeof(float)));
+    //    glEnableVertexAttribArray(2);
 
-    // Rendering Loop
+        // Rendering Loop
     while (!glfwWindowShouldClose(window))
     {
         // Setup
@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
         mat3 uniform_matrix;
         glm_mat3_mul(matrix_rotate_x, matrix_rotate_z, uniform_matrix);
         GLint location = glGetUniformLocation(program, "u_rotation_matrix");
-//UNIFORM DELETE===============================================================
+        //UNIFORM DELETE===============================================================
         glUniformMatrix3fv(location, 1, GL_FALSE, &uniform_matrix);
         glBindVertexArray(vertexArrayObject);
 
@@ -307,8 +307,8 @@ int main(int argc, char* argv[])
     glDeleteBuffers(1, &elementBufferObject);
     glDeleteShader(vertex_shader.id);
     glDeleteShader(fragment_shader.id);
-//    glDeleteTextures(1, &(my_texture.id));
-//    stbi_image_free(my_texture.image_data);
+    //    glDeleteTextures(1, &(my_texture.id));
+    //    stbi_image_free(my_texture.image_data);
     free(vertex_shader.source_code);
     free(fragment_shader.source_code);
     glfwTerminate();
